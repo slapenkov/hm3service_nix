@@ -168,7 +168,7 @@ bool dataSent = true;
 #ifndef SHTDN_REASON_MAJOR_OTHER
 #define SHTDN_REASON_MAJOR_OTHER 0
 #endif
-static const char * abc_ru = {"абвгде жзийклмнопрстуфхцчшщъыьэюя1234567890"};
+static const char * abc_ru = {"Р°Р±РІРіРґРµ Р¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚СѓС„С…С†С‡С€С‰СЉС‹СЊСЌСЋСЏ1234567890"};
 static const char * notation[] = {"a", "b", "v", "g", "d", "ye", "zh", "z", "i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "kh", "ts", "ch", "sh", "sch", "tz", "y", "mz", "e", "yu", "ya", "x", "yy", "iy", "yo"};
 static const char * emptyrow = "                    ";
 const int ROW_WIDTH = 21;
@@ -283,7 +283,7 @@ lab1:
 		NewMedium();
 		if(!ReadDefaultMedium())
 		{
-			SetMedium("по умолчанию");
+			SetMedium("РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ");
 			if(!HasSomeDefaultFiles())
 			{
 				SetDefaultValues();
@@ -458,7 +458,7 @@ Kalibr:
 		Rel=Rel ^  0x01;
 		RegistrTM_int[1]=Rel;
 		ComWriteIntReg(0x2,0x31,0x1);
-		strcpy(Text,"Очистка   "); tempchar=PrintXY(0,3,10);
+		strcpy(Text,"РћС‡РёСЃС‚РєР°   "); tempchar=PrintXY(0,3,10);
 		xtim_n=clock();
 		do {xtim=clock();
 		tempchar=ReadKeyBuffered();
@@ -474,7 +474,7 @@ Kalibr:
 		//SetCursor(0xA,0x10);
 	};
 	SleepWithService(1000);
-	strcpy(Text,"Измерение "); tempchar=PrintXY(0,3,10);
+	strcpy(Text,"РР·РјРµСЂРµРЅРёРµ "); tempchar=PrintXY(0,3,10);
 	SleepWithService(50);
 	tempchar=ReadDataSPMCurrent();
 	Calc();
@@ -591,7 +591,7 @@ Rab:
 		Rel=Rel ^  0x01;
 		RegistrTM_int[1]=Rel;
 		ComWriteIntReg(0x2,0x31,0x1);
-		strcpy(Text,"Очистка   "); tempchar=PrintXY(0,3,10);
+		strcpy(Text,"РћС‡РёСЃС‚РєР°   "); tempchar=PrintXY(0,3,10);
 		xtim_n=clock();
 		do {xtim=clock();
 		tempchar=ReadKeyBuffered();
@@ -615,7 +615,7 @@ Rab:
 		RegistrTM_int[1]=Rel;
 		tempchar=ComWriteIntReg(0x2,0x31,0x1);
 		////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
-		strcpy(Text,"Загрузка  "); tempchar=PrintXY(0,3,10);
+		strcpy(Text,"Р—Р°РіСЂСѓР·РєР°  "); tempchar=PrintXY(0,3,10);
 		////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
 		xtim_n=clock();
 		do {xtim=clock();
@@ -647,7 +647,7 @@ Rab:
 		if (IS_EXPERIMENT && Key=='3'||Key=='5'||Key=='7') {goto Exr;};
 
 
-		strcpy(Text,"Измерение "); tempchar=PrintXY(0,3,10);
+		strcpy(Text,"РР·РјРµСЂРµРЅРёРµ "); tempchar=PrintXY(0,3,10);
 		SleepWithService(servicetime);
 
 		tempchar=ReadDataSPMCurrent();
@@ -693,7 +693,7 @@ Rab:
 		if(!CheckFilling())
 		{
 			strcpy(Text,"           "); tempchar=PrintXY(14,5,5);
-			strcpy(Text,"Нет заполнения");
+			strcpy(Text,"РќРµС‚ Р·Р°РїРѕР»РЅРµРЅРёСЏ");
 			tempchar=PrintXY(3,4,14);
 		}
 
@@ -755,7 +755,7 @@ Grad:
 	Rel=Rel ^  0x01;
 	RegistrTM_int[1]=Rel;
 	ComWriteIntReg(0x2,0x31,0x1);
-	strcpy(Text,"Очистка   "); tempchar=PrintXY(0,3,10);
+	strcpy(Text,"РћС‡РёСЃС‚РєР°   "); tempchar=PrintXY(0,3,10);
 	xtim_n=clock();
 	do {xtim=clock();
 	tempchar=ReadKeyBuffered();
@@ -780,7 +780,7 @@ Grad:
 	RegistrTM_int[1]=Rel;
 	tempchar=ComWriteIntReg(0x2,0x31,0x1);
 	////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
-	strcpy(Text,"Загрузка  "); tempchar=PrintXY(0,3,10);
+	strcpy(Text,"Р—Р°РіСЂСѓР·РєР°  "); tempchar=PrintXY(0,3,10);
 	////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
 	xtim_n=clock();
 	do {xtim=clock();
@@ -808,7 +808,7 @@ Grad:
 		tempchar=='7'||tempchar=='9') {Key=tempchar;};
 	if (IS_EXPERIMENT && Key=='1'||Key=='5'||Key=='7') {goto Exg;};
 
-	strcpy(Text,"Измерение "); tempchar=PrintXY(0,3,10);
+	strcpy(Text,"РР·РјРµСЂРµРЅРёРµ "); tempchar=PrintXY(0,3,10);
 	SleepWithService(50);
 	tempchar=ReadDataSPMCurrent();
 	Calc();
@@ -932,7 +932,7 @@ Nastr:
 		tempchar=PrintXY(16,j,3);		 
 	};
 
-	if (AK==0) {Text[2]='ч';Text[1]='у';Text[0]='р';} else {Text[2]='т';Text[1]='в';Text[0]='а';};
+	if (AK==0) {Text[2]='С‡';Text[1]='Сѓ';Text[0]='СЂ';} else {Text[2]='С‚';Text[1]='РІ';Text[0]='Р°';};
 	tempchar=PrintXY(14,7,3);
 	//if(Aout_tip == 0) Aout_tip = 1;	
 	/*if (Aout_tip==1) {Text[3]=' ';Text[2]='5';Text[1]='-';Text[0]='0';};
@@ -952,7 +952,7 @@ Nastr:
 		if (Key=='8') {PosY--; if (PosY>20) PosY=12; SetCursor(PosX, PosY);do {Key=ReadKeyBuffered();} while (Key!='Z');};
 		if (Key=='S') {// printf("%x",Key);printf(" \n"); Sleep(2000);
 			if (PosY==7) {AK++; if (AK>1) AK=0;
-			if (AK==0) {Text[2]='ч';Text[1]='у';Text[0]='р';} else {Text[2]='т';Text[1]='в';Text[0]='а';};
+			if (AK==0) {Text[2]='С‡';Text[1]='Сѓ';Text[0]='СЂ';} else {Text[2]='С‚';Text[1]='РІ';Text[0]='Р°';};
 			tempchar=PrintXY(14,7,3);do {Key=ReadKeyBuffered();} while (Key!='Z');};
 			//Aout settings
 			if (PosY==8)
@@ -1298,7 +1298,7 @@ for (j=3;j<6;j++)
 	};
 	tempchar=PrintXY(12,j,8);
 };
-if (Nzp==0) {strcpy(Text,"Не использ."); tempchar=PrintXY(9,7,11);Sleep(100);};
+if (Nzp==0) {strcpy(Text,"РќРµ РёСЃРїРѕР»СЊР·."); tempchar=PrintXY(9,7,11);Sleep(100);};
 if (Nzp==1) {strcpy(Text,"alfa > por "); tempchar=PrintXY(9,7,11);Sleep(100);};
 if (Nzp==2) {strcpy(Text,"alfa < por "); tempchar=PrintXY(9,7,11);Sleep(100);};
 if (Nzp==3) {strcpy(Text,"beta > por "); tempchar=PrintXY(9,7,11);Sleep(100);};
@@ -1337,7 +1337,7 @@ npl1:;
 
 		{
 			Nzp++; if (Nzp>6) {Nzp=0;};
-			if (Nzp==0) {strcpy(Text,"Не использ."); tempchar=PrintXY(9,7,11);Sleep(100);};
+			if (Nzp==0) {strcpy(Text,"РќРµ РёСЃРїРѕР»СЊР·."); tempchar=PrintXY(9,7,11);Sleep(100);};
 			if (Nzp==1) {strcpy(Text,"alfa > por "); tempchar=PrintXY(9,7,11);Sleep(100);};
 			if (Nzp==2) {strcpy(Text,"alfa < por "); tempchar=PrintXY(9,7,11);Sleep(100);};
 			if (Nzp==3) {strcpy(Text,"beta > por "); tempchar=PrintXY(9,7,11);Sleep(100);};
@@ -1587,16 +1587,16 @@ char Rezonans() // Poisk rezonansa
 	char tempchar;
 	float y,z;
 
-	strcpy(Text,"Поиск резонанса     ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Подпорка            ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Альфа               ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Бета                ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Гамма               ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Нач. поиска        В");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Кон. поиска        В");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Шаг поиска         В");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F3 -Поиск           ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Sh-Ред F5-Сохр С-вых");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРѕРёСЃРє СЂРµР·РѕРЅР°РЅСЃР°     ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРѕРґРїРѕСЂРєР°            ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РђР»СЊС„Р°               ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р‘РµС‚Р°                ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р“Р°РјРјР°               ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РќР°С‡. РїРѕРёСЃРєР°        Р’");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РљРѕРЅ. РїРѕРёСЃРєР°        Р’");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РЁР°Рі РїРѕРёСЃРєР°         Р’");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F3 -РџРѕРёСЃРє           ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р РµРґ F5-РЎРѕС…СЂ РЎ-РІС‹С…");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 
 	PosY=9;
 	y=N_Rez*1000; for (i=8;i!=0;i--) {z=fmod(y,10); y=floor(y/10); temp[PosY][i-1]=z+48;};
@@ -1761,7 +1761,7 @@ bool NewMedium()
 char VirtualKeyboard(char * buffer)
 {
 	ClrScr();
-	SchablonKeyboard(" Новая градуировка: ", buffer);
+	SchablonKeyboard(" РќРѕРІР°СЏ РіСЂР°РґСѓРёСЂРѕРІРєР°: ", buffer);
 
 	char tempchar = 0;
 	int charindex = strlen(buffer);
@@ -2001,22 +2001,22 @@ char SchablonNSlug() // Schablon ekrana
 	char tempchar;
 	////printf("Schablon");printf(" \n");SleepWithService(3000);
 
-	strcpy(Text,"Подпорка   =        ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Амплитуда  =        ");  tempchar=PrintXY(0,1,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРѕРґРїРѕСЂРєР°   =        ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РђРјРїР»РёС‚СѓРґР°  =        ");  tempchar=PrintXY(0,1,20);printf("%x",tempchar);printf(" \n");
 	//strcpy(Text,"                    ");  tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"Va  =               ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"kgt =               ");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"kgv =               ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"T   =               ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
 	// strcpy(Text,"                    ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Кол-во датчиков     ");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Ном. датчика 1      ");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Ном. датчика 2      ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Ном. прибора        ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"К-т усиления        ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РљРѕР»-РІРѕ РґР°С‚С‡РёРєРѕРІ     ");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РќРѕРј. РґР°С‚С‡РёРєР° 1      ");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РќРѕРј. РґР°С‚С‡РёРєР° 2      ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РќРѕРј. РїСЂРёР±РѕСЂР°        ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Рљ-С‚ СѓСЃРёР»РµРЅРёСЏ        ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
 	// strcpy(Text,"                    ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F3 -Поиск резонанса ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Sh-Ред F5-Сохр С-вых");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F3 -РџРѕРёСЃРє СЂРµР·РѕРЅР°РЅСЃР° ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р РµРґ F5-РЎРѕС…СЂ РЎ-РІС‹С…");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 	return 0;
 }
 /////////////////////////////
@@ -2028,13 +2028,13 @@ char SchablonPorog() // Schablon ekrana
 	char tempchar;
 	//printf("Schablon");printf(" \n");SleepWithService(3000);
 
-	strcpy(Text,"    Выбор порога    ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Порог alfa          ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Порог beta          ");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Порог gamma         ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Условие             ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"    Р’С‹Р±РѕСЂ РїРѕСЂРѕРіР°    ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРѕСЂРѕРі alfa          ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРѕСЂРѕРі beta          ");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРѕСЂРѕРі gamma         ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РЈСЃР»РѕРІРёРµ             ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
 
-	strcpy(Text,"Sh-Ред F5-Сохр С-вых");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р РµРґ F5-РЎРѕС…СЂ РЎ-РІС‹С…");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 
 	// SleepWithService(10000);
 	return 0;
@@ -2061,7 +2061,7 @@ char SchablonNGrad() // Schablon ekrana
 	strcpy(Text,"k1  =               ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"Wmax=               ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"Wmin=               ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Sh-Ред F5-Сохр С-вых");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р РµРґ F5-РЎРѕС…СЂ РЎ-РІС‹С…");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 	return 0;
 }
 /////////////////////////////
@@ -2074,23 +2074,23 @@ char SchablonNastrojka() // Schablon ekrana
 	//char pos=0;
 	char tempchar;
 
-	strcpy(Text,"Среда :             "); tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РЎСЂРµРґР° :             "); tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Время заполн.      с");  tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Время очист.       с");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Время измер.       с");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Период калибр.     с");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Уставка реле     . %");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Тип калибр.         ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Настройка ток. вых. ");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Служебн. настр.     ");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Градуир. коэфф.     ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Выбор порога        ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n"); 
-	strcpy(Text,"Новая среда         ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р’СЂРµРјСЏ Р·Р°РїРѕР»РЅ.      СЃ");  tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р’СЂРµРјСЏ РѕС‡РёСЃС‚.       СЃ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р’СЂРµРјСЏ РёР·РјРµСЂ.       СЃ");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РџРµСЂРёРѕРґ РєР°Р»РёР±СЂ.     СЃ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РЈСЃС‚Р°РІРєР° СЂРµР»Рµ     . %");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РўРёРї РєР°Р»РёР±СЂ.         ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РќР°СЃС‚СЂРѕР№РєР° С‚РѕРє. РІС‹С…. ");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РЎР»СѓР¶РµР±РЅ. РЅР°СЃС‚СЂ.     ");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р“СЂР°РґСѓРёСЂ. РєРѕСЌС„С„.     ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р’С‹Р±РѕСЂ РїРѕСЂРѕРіР°        ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n"); 
+	strcpy(Text,"РќРѕРІР°СЏ СЃСЂРµРґР°         ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Sh-Редактировать    ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F1-Работа F2-Град.  ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F3-Калибр F5-Сохран.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р РµРґР°РєС‚РёСЂРѕРІР°С‚СЊ    ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F1-Р Р°Р±РѕС‚Р° F2-Р“СЂР°Рґ.  ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F3-РљР°Р»РёР±СЂ F5-РЎРѕС…СЂР°РЅ.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 	return 0;
 }
 /////////////////////////////
@@ -2107,14 +2107,14 @@ char SchablonRabota() // Schablon ekrana
 	strcpy(Text,GetCenteredRow(mediumName)); 
 	tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Режим: Работа       "); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р РµР¶РёРј: Р Р°Р±РѕС‚Р°       "); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
 
-	strcpy(Text,"ВЛАЖНОСТЬ:         %");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р’Р›РђР–РќРћРЎРўР¬:         %");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
 
-	strcpy(Text,"Т среды:           С");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Рў СЃСЂРµРґС‹:           РЎ");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
 
-	strcpy(Text,"F2-Град.  F3-Калибр.");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F4-Настройка        ");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F2-Р“СЂР°Рґ.  F3-РљР°Р»РёР±СЂ.");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F4-РќР°СЃС‚СЂРѕР№РєР°        ");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 	return 0;
 }
 /////////////////////////////
@@ -2131,20 +2131,20 @@ char SchablonGrad() // Schablon ekrana
 	strcpy(Text,GetCenteredRow(mediumName));
 	tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Режим: Градуировка  "); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
-	//strcpy(Text,"Операция:  Ошибка:  "); tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р РµР¶РёРј: Р“СЂР°РґСѓРёСЂРѕРІРєР°  "); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
+	//strcpy(Text,"РћРїРµСЂР°С†РёСЏ:  РћС€РёР±РєР°:  "); tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
 	//strcpy(Text,"                    "); tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Влажность:         %");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Т датчика:         С");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Т среды:           С");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Т датчика2:        С");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р’Р»Р°Р¶РЅРѕСЃС‚СЊ:         %");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Рў РґР°С‚С‡РёРєР°:         РЎ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Рў СЃСЂРµРґС‹:           РЎ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Рў РґР°С‚С‡РёРєР°2:        РЎ");  tempchar=PrintXY(0,8,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Альфа:              ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Бета :              ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Гамма:              ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РђР»СЊС„Р°:              ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р‘РµС‚Р° :              ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р“Р°РјРјР°:              ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"F1-Работа F3-Калибр.");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F4-Настр. F5-Сохран.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F1-Р Р°Р±РѕС‚Р° F3-РљР°Р»РёР±СЂ.");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F4-РќР°СЃС‚СЂ. F5-РЎРѕС…СЂР°РЅ.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 	return 0;
 }
 /////////////////////////////
@@ -2161,20 +2161,20 @@ char SchablonKalibr() // Schablon ekrana
 	strcpy(Text,GetCenteredRow(mediumName));
 	tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Режим: Калибровка   "); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
-	//strcpy(Text,"Операция:  Ошибка:  "); tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р РµР¶РёРј: РљР°Р»РёР±СЂРѕРІРєР°   "); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
+	//strcpy(Text,"РћРїРµСЂР°С†РёСЏ:  РћС€РёР±РєР°:  "); tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
 	//strcpy(Text,"                    "); tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Альфа0:     Тг:     ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Бета0 :     Тс:     ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Гамма0:             ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РђР»СЊС„Р°0:     РўРі:     ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р‘РµС‚Р°0 :     РўСЃ:     ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р“Р°РјРјР°0:             ");  tempchar=PrintXY(0,7,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"Альфа :     Тг:     ");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Бета  :     Тс:     ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Гамма :             ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РђР»СЊС„Р° :     РўРі:     ");  tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р‘РµС‚Р°  :     РўСЃ:     ");  tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р“Р°РјРјР° :             ");  tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
 	//
-	strcpy(Text,"F3-Калибровка       ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F1-Работа F2-Град.  ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F4-Настр. F5-Сохран.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F3-РљР°Р»РёР±СЂРѕРІРєР°       ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F1-Р Р°Р±РѕС‚Р° F2-Р“СЂР°Рґ.  ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F4-РќР°СЃС‚СЂ. F5-РЎРѕС…СЂР°РЅ.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 	return 0;
 }
 
@@ -2183,16 +2183,16 @@ void SchablonKeyboard(char * title, char * buffer)
 	char tempchar;
 	strcpy(Text,title); tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
 	if(buffer != NULL) { strcpy(Text,GetFullRow(buffer)); tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n"); };
-	strcpy(Text,"Up-Вверх Dn-Вниз    "); tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Lf-Влево Rg-Вправо  "); tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Up-Р’РІРµСЂС… Dn-Р’РЅРёР·    "); tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Lf-Р’Р»РµРІРѕ Rg-Р’РїСЂР°РІРѕ  "); tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
 
-	strcpy(Text,"абвгде жзийклмнопрст"); tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"уфхцчшщъыьэюя1234567"); tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р°Р±РІРіРґРµ Р¶Р·РёР№РєР»РјРЅРѕРїСЂСЃС‚"); tempchar=PrintXY(0,9,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"СѓС„С…С†С‡С€С‰СЉС‹СЊСЌСЋСЏ1234567"); tempchar=PrintXY(0,10,20);printf("%x",tempchar);printf(" \n");
 	strcpy(Text,"890                 "); tempchar=PrintXY(0,11,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Sh-Вставка C-Стереть");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F5-Готово           ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F1-Работа F2-Град.  ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"F3-Калибр. F4-Настр.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р’СЃС‚Р°РІРєР° C-РЎС‚РµСЂРµС‚СЊ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F5-Р“РѕС‚РѕРІРѕ           ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F1-Р Р°Р±РѕС‚Р° F2-Р“СЂР°Рґ.  ");  tempchar=PrintXY(0,14,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"F3-РљР°Р»РёР±СЂ. F4-РќР°СЃС‚СЂ.");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 }
 
 /////////////////////////////
@@ -2207,14 +2207,14 @@ char ShablonPeriphSetup(){
 	char tempchar;
 	//printf("Schablon");printf(" \n");SleepWithService(3000);
 
-	strcpy(Text,"Настройка ток. вых. ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Тип выхода:       мА");  tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Смещение ЦАП:       ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Масштаб ЦАП:        ");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Знач.потенц.:       ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text,"Тест ЦАП            ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РќР°СЃС‚СЂРѕР№РєР° С‚РѕРє. РІС‹С…. ");  tempchar=PrintXY(0,0,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РўРёРї РІС‹С…РѕРґР°:       РјРђ");  tempchar=PrintXY(0,2,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РЎРјРµС‰РµРЅРёРµ Р¦РђРџ:       ");  tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РњР°СЃС€С‚Р°Р± Р¦РђРџ:        ");  tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Р—РЅР°С‡.РїРѕС‚РµРЅС†.:       ");  tempchar=PrintXY(0,5,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"РўРµСЃС‚ Р¦РђРџ            ");  tempchar=PrintXY(0,6,20);printf("%x",tempchar);printf(" \n");
 
-	strcpy(Text,"Sh-Ред F5-Сохр С-вых");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
+	strcpy(Text,"Sh-Р РµРґ F5-РЎРѕС…СЂ РЎ-РІС‹С…");  tempchar=PrintXY(0,15,20);printf("%x",tempchar);printf(" \n");
 
 	// SleepWithService(10000);
 	return 0;
@@ -4114,21 +4114,21 @@ char * GetTranslatedString(char * source)
 
 	for(int i=0;i<initlength;i++)
 	{
-		if(i < initlength - 1 && source[i] == 'к' && source[i+1] == 'с')
+		if(i < initlength - 1 && source[i] == 'Рє' && source[i+1] == 'СЃ')
 		{
 			strcat(translated, notation[32]);
 			i++;
 			continue;
 		}
 
-		if(i < initlength - 1 && source[i] == 'ы' && source[i+1] == 'й')
+		if(i < initlength - 1 && source[i] == 'С‹' && source[i+1] == 'Р№')
 		{
 			strcat(translated, notation[33]);
 			i++;
 			continue;
 		}
 
-		if(i < initlength - 1 && source[i] == 'и' && source[i+1] == 'й')
+		if(i < initlength - 1 && source[i] == 'Рё' && source[i+1] == 'Р№')
 		{
 			strcat(translated, notation[34]);
 			i++;
@@ -4141,9 +4141,9 @@ char * GetTranslatedString(char * source)
 			continue;
 		}
 
-		if(source[i] >= 'а' && source[i] <= 'я')
+		if(source[i] >= 'Р°' && source[i] <= 'СЏ')
 		{
-			strcat(translated, notation[(int)source[i] - (int)'а']);
+			strcat(translated, notation[(int)source[i] - (int)'Р°']);
 		}
 		else
 		{

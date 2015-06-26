@@ -1,5 +1,4 @@
 typedef unsigned char byte;
-typedef unsigned int DWORD;
 
 #include "stdio.h"
 #include "stdlib.h"
@@ -97,8 +96,12 @@ void SetMedium(char * newMediumName);
 bool HasSomeDefaultFiles();
 //void CompliteAndSendData(CommandEntity * entity);
 void InitialiseBuffer(unsigned char * const buffer, int length);
-//extern char IniMWT(); //Inicializacia pribora
 
+void msleep(unsigned int milliseconds){
+	usleep(milliseconds*1000);
+	}
+
+//extern char IniMWT(); //Inicializacia pribora
 byte ComDataWrite[260];
 byte ComDataRead[260];
 char Text[255];
@@ -144,6 +147,7 @@ float Poralfa = 0, Porbeta = 0, Porgamma = 0;
 long int xtim = 0, xtim_n = 0;
 byte Regim = 0;
 //HANDLE hCom1 = NULL,hCom2 = NULL;
+int hCom1, hCom2;
 
 //LPDWORD lpEvtMask;
 
@@ -167,7 +171,7 @@ bool dataSent = true;
 
 #define NET_ZAPOLNENIYA_PING_PERIOD 60*1000
 
-static const char * abc_ru = { "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ1234567890" };
+static const char * abc_ru = { "абвгде жзийклмнопрстуфхцчшщъыьэюя1234567890" };
 static const char * notation[] = { "a", "b", "v", "g", "d", "ye", "zh", "z",
 		"i", "y", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "kh",
 		"ts", "ch", "sh", "sch", "tz", "y", "mz", "e", "yu", "ya", "x", "yy",
@@ -186,9 +190,12 @@ char newMediumStr[ROW_WIDTH];
 
 //DataTransferMaster master(RS485, "COM2", 12 * 1000);
 
-int _tmain(int argc, char* argv[]) {
-	for (int i = 0; i < MEDIUM_COUNT; i++)
+int main(int argc, char* argv[]) {
+	printf("Application started\n");
+	msleep(10);
+	for (int i = 0; i < MEDIUM_COUNT; i++){
 		mediums[i][0] = 0;
+	}
 	memset(&trimStr[0], 0, sizeof(trimStr));
 	memset(&fullrow[0], 0, sizeof(fullrow));
 	memset(&masterbuffer[0], 0, sizeof(masterbuffer));
@@ -205,23 +212,17 @@ int _tmain(int argc, char* argv[]) {
 	strcpy(mediumName, emptyrow);
 	mediumName[strlen(emptyrow)] = 0;
 
-	int osize = 256;
-	char obuf[256];
-	osize = GetModuleFileName(NULL, obuf, osize);
+	//int osize = 256;
+	//char obuf[256];
+	//osize = GetModuleFileName(NULL, obuf, osize);
 	char applicationName[256];
-	T2A(applicationName, obuf, osize);
-	SetPathDir(applicationName);
+	//T2A(applicationName, obuf, osize);
+	//SetPathDir(applicationName); for debug
 
 	//char * binarypath = new char[256];
 	//char * messagepath = new char[256];
 
 	char readBuffer = 'Z';
-
-	pthread_t thread1;
-	int iret1;
-
-	iret1 = pthread_create(&thread1, NULL, ReadKeyThreadProc, NULL); //create keyboard reader thread
-	pthread_join(thread1, NULL);
 
 	char tempchar;
 	int tempcount = 0;
@@ -240,6 +241,14 @@ int _tmain(int argc, char* argv[]) {
 		if (tempcount < 5)
 			goto lab1;
 	};
+
+	pthread_t thread1;
+
+	int iret1 = pthread_create(&thread1, NULL, ReadKeyThreadProc, NULL); //create keyboard reader thread
+	//pthread_join(thread1, NULL);
+	printf("ReadKey thread created\n");
+
+		
 	//master.Open(hCom2);
 	//master.CompliteTemplate = &CompliteAndSendData;
 	SleepWithService(1000);
@@ -268,11 +277,12 @@ int _tmain(int argc, char* argv[]) {
 	//WriteDataSPMSet();
 	////printf("Test1"); //printf(" \n");
 
+	printf("\nLoad settings...");
 	if (!ReadDefaultMedium()) {
 		Reader(true);
 		NewMedium();
 		if (!ReadDefaultMedium()) {
-			SetMedium("пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+			SetMedium("по умолчанию");
 			if (!HasSomeDefaultFiles()) {
 				SetDefaultValues();
 			}
@@ -290,6 +300,7 @@ int _tmain(int argc, char* argv[]) {
 	////printf("Test1"); printf(" \n");
 	//Ku0=2;Ku1=2;
 	//Saw_A0=3000;Saw_A1=2000;
+	printf("\nSetup zond...");
 	WriteDataSPMSet();
 	SleepWithService(500);  //////////////////////////
 	////printf("Test1"); printf(" \n");
@@ -302,7 +313,7 @@ int _tmain(int argc, char* argv[]) {
 	//printf("Saw_A0 =");printf("%u",Saw_A0);printf(" \n");
 	//printf("Saw_A1=");printf("%u",Saw_A1);printf(" \n");
 	//SleepWithService(10000);
-
+	printf("\nMode selector...");
 	Regim = '1';
 	do {
 		Reg:
@@ -353,6 +364,7 @@ int _tmain(int argc, char* argv[]) {
 	 DeleteCriticalSection(g_WandT_Calc);
 	 DeleteCriticalSection(g_ReadKey);
 	 */
+	 exit(0);
 }
 
 char ReadKeyBuffered() {
@@ -507,7 +519,7 @@ char Kalibrovka() // Regim kalibrovki
 		Rel = Rel ^ 0x01;
 		RegistrTM_int[1] = Rel;
 		ComWriteIntReg(0x2, 0x31, 0x1);
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ   ");
+		strcpy(Text,"Очистка   ");
 		tempchar = PrintXY(0, 3, 10);
 		xtim_n = clock();
 		do {
@@ -530,7 +542,7 @@ char Kalibrovka() // Regim kalibrovki
 		//SetCursor(0xA,0x10);
 	};
 	SleepWithService(1000);
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
+	strcpy(Text,"Измерение ");
 	tempchar = PrintXY(0, 3, 10);
 	SleepWithService(50);
 	tempchar = ReadDataSPMCurrent();
@@ -757,7 +769,7 @@ char Rabota() // Regim raboty
 		Rel = Rel ^ 0x01;
 		RegistrTM_int[1] = Rel;
 		ComWriteIntReg(0x2, 0x31, 0x1);
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ   ");
+		strcpy(Text,"Очистка   ");
 		tempchar = PrintXY(0, 3, 10);
 		xtim_n = clock();
 		do {
@@ -786,7 +798,7 @@ char Rabota() // Regim raboty
 		RegistrTM_int[1] = Rel;
 		tempchar = ComWriteIntReg(0x2, 0x31, 0x1);
 		////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  ");
+		strcpy(Text,"Загрузка  ");
 		tempchar = PrintXY(0, 3, 10);
 		////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
 		xtim_n = clock();
@@ -822,7 +834,7 @@ char Rabota() // Regim raboty
 			goto Exr;
 		}
 
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
+		strcpy(Text,"Измерение ");
 		tempchar = PrintXY(0, 3, 10);
 		SleepWithService(servicetime);
 
@@ -890,7 +902,7 @@ char Rabota() // Regim raboty
 		if (!CheckFilling()) {
 			strcpy(Text, "           ");
 			tempchar = PrintXY(14, 5, 5);
-			strcpy(Text, "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+			strcpy(Text,"Нет заполнения");
 			tempchar = PrintXY(3, 4, 14);
 		}
 
@@ -955,7 +967,7 @@ char Graduirovka() // Regim graduirovki
 		Rel = Rel ^ 0x01;
 		RegistrTM_int[1] = Rel;
 		ComWriteIntReg(0x2, 0x31, 0x1);
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ   ");
+		strcpy(Text,"Очистка   ");
 		tempchar = PrintXY(0, 3, 10);
 		xtim_n = clock();
 		do {
@@ -987,7 +999,7 @@ char Graduirovka() // Regim graduirovki
 		RegistrTM_int[1] = Rel;
 		tempchar = ComWriteIntReg(0x2, 0x31, 0x1);
 		////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  ");
+		strcpy(Text,"Загрузка  ");
 		tempchar = PrintXY(0, 3, 10);
 		////printf("Err=");printf("%x",tempchar);printf(" \n");SleepWithService(2000);
 		xtim_n = clock();
@@ -1026,7 +1038,7 @@ char Graduirovka() // Regim graduirovki
 			goto Exg;
 		};
 
-		strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
+		strcpy(Text,"Измерение ");
 		tempchar = PrintXY(0, 3, 10);
 		SleepWithService(50);
 		tempchar = ReadDataSPMCurrent();
@@ -1197,35 +1209,35 @@ char Nastrojka() // Regim nastrojki
 		z = fmod(y, 10);
 		y = floor(y / 10);
 		temp[PosY][i - 1] = z + 48;
-	};
+	}
 	PosY++;
 	y = VO;
 	for (i = 3; i != 0; i--) {
 		z = fmod(y, 10);
 		y = floor(y / 10);
 		temp[PosY][i - 1] = z + 48;
-	};
+	}
 	PosY++;
 	y = VI;
 	for (i = 3; i != 0; i--) {
 		z = fmod(y, 10);
 		y = floor(y / 10);
 		temp[PosY][i - 1] = z + 48;
-	};
+	}
 	PosY++;
 	y = Tak;
 	for (i = 3; i != 0; i--) {
 		z = fmod(y, 10);
 		y = floor(y / 10);
 		temp[PosY][i - 1] = z + 48;
-	};
+	}
 	PosY++;
 	y = UstRele;
 	for (i = 3; i != 0; i--) {
 		z = fmod(y, 10);
 		y = floor(y / 10);
 		temp[PosY][i - 1] = z + 48;
-	};
+	}
 	PosY++;
 
 	Nastr: strcpy(Text, SetMediumRow());
@@ -1249,19 +1261,20 @@ char Nastrojka() // Regim nastrojki
 		strcpy(Text, emptyrow);
 		for (i = 0; i < 3; i++) {
 			Text[i] = temp[j][i];
-		};
+		}
 		tempchar = PrintXY(16, j, 3);
-	};
+	}
 
 	if (AK == 0) {
-		Text[2] = 'пїЅ';
-		Text[1] = 'пїЅ';
-		Text[0] = 'пїЅ';
+		Text[2]='ч';
+		Text[1]='у';
+		Text[0]='р';
 	} else {
-		Text[2] = 'пїЅ';
-		Text[1] = 'пїЅ';
-		Text[0] = 'пїЅ';
-	};
+		Text[2]='т';
+		Text[1]='в';
+		Text[0]='а';
+	}
+	
 	tempchar = PrintXY(14, 7, 3);
 	//if(Aout_tip == 0) Aout_tip = 1;	
 	/*if (Aout_tip==1) {Text[3]=' ';Text[2]='5';Text[1]='-';Text[0]='0';};
@@ -1279,8 +1292,8 @@ char Nastrojka() // Regim nastrojki
 				|| tempchar == '1' || tempchar == '2' || tempchar == '8'
 				|| tempchar == 'S') {
 			Key = tempchar;
-		};
-
+		}
+		
 		if (Key == '2') {
 			PosY++;
 			if (PosY > 12)
@@ -1289,7 +1302,7 @@ char Nastrojka() // Regim nastrojki
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
-		};
+		}
 		if (Key == '8') {
 			PosY--;
 			if (PosY > 20)
@@ -1298,26 +1311,26 @@ char Nastrojka() // Regim nastrojki
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
-		};
-		if (Key == 'S') { // printf("%x",Key);printf(" \n"); Sleep(2000);
+		}
+		if (Key == 'S') { // printf("%x",Key);printf(" \n"); msleep(2000);
 			if (PosY == 7) {
 				AK++;
 				if (AK > 1)
 					AK = 0;
 				if (AK == 0) {
-					Text[2] = 'пїЅ';
-					Text[1] = 'пїЅ';
-					Text[0] = 'пїЅ';
+					Text[2]='ч';
+					Text[1]='у';
+					Text[0]='р';
 				} else {
-					Text[2] = 'пїЅ';
-					Text[1] = 'пїЅ';
-					Text[0] = 'пїЅ';
-				};
+					Text[2]='т';
+					Text[1]='в';
+					Text[0]='а';
+				}
 				tempchar = PrintXY(14, 7, 3);
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
-			};
+			}
 			//Aout settings
 			if (PosY == 8) {
 				/*Aout_tip++; if (Aout_tip>3) Aout_tip=1;
@@ -1327,12 +1340,12 @@ char Nastrojka() // Regim nastrojki
 				 tempchar=PrintXY(14,8,4);do {Key=ReadKeyBuffered();} while (Key!='Z');
 				 */
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				ShablonPeriphSetup();
 				PeriphSetup();
-				//Sleep(5000);
+				//msleep(5000);
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonNastrojka();
 				do {
 					Key = ReadKeyBuffered();
@@ -1342,11 +1355,11 @@ char Nastrojka() // Regim nastrojki
 
 			if (PosY == 9) {
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonNSlug();
 				NSlug();
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonNastrojka();
 				do {
 					Key = ReadKeyBuffered();
@@ -1356,17 +1369,17 @@ char Nastrojka() // Regim nastrojki
 
 			if (PosY == 11) {
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonPorog();
 				Porog();
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonNastrojka();
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
 				goto Nastr;
-			};
+			}
 			if (PosY == 0) {
 				if (media_count > 1) {
 					SetMediumRow(1);
@@ -1382,9 +1395,9 @@ char Nastrojka() // Regim nastrojki
 			if (PosY == 2 || PosY == 3 || PosY == 4 || PosY == 5) {
 				PosX = 16;
 				Key = 'Z';
-				for (i = PosX; i < PosX + 3; i++) {				//Sleep(1000);
+				for (i = PosX; i < PosX + 3; i++) {				//msleep(1000);
 					Key = 'Z';
-					SetCursor(i, PosY);					//Sleep(1000);
+					SetCursor(i, PosY);					//msleep(1000);
 					//printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 					do {
 						Key = ReadKeyBuffered();
@@ -1393,21 +1406,21 @@ char Nastrojka() // Regim nastrojki
 					Text[0] = Key;
 					PrintXY(i, PosY, 1);
 					temp[PosY][i - 16] = Text[0];
-					Sleep(1000);
+					msleep(1000);
 					do {
 						Key = ReadKeyBuffered();
 					} while (Key != 'Z');
 				};
 				PosX = 0;
 				SetCursor(PosX, PosY);
-			};
+			}
 			if (PosY == 6) {
 				PosX = 16;
 				Key = 'Z';
 				int index = 0;
-				for (i = PosX - 1; i < PosX + 1; i++) {			//Sleep(1000);
+				for (i = PosX - 1; i < PosX + 1; i++) {			//msleep(1000);
 					Key = 'Z';
-					SetCursor(i, PosY);				//Sleep(1000);
+					SetCursor(i, PosY);				//msleep(1000);
 					//printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 					do {
 						Key = ReadKeyBuffered();
@@ -1416,14 +1429,14 @@ char Nastrojka() // Regim nastrojki
 					Text[0] = Key;
 					PrintXY(i, PosY, 1);
 					temp[PosY][index++] = Text[0];
-					Sleep(1000);
+					msleep(1000);
 					do {
 						Key = ReadKeyBuffered();
 					} while (Key != 'Z');
-				};
+				}
 
 				Key = 'Z';
-				SetCursor(PosX + 2, PosY);					//Sleep(1000);
+				SetCursor(PosX + 2, PosY);					//msleep(1000);
 				//printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 				do {
 					Key = ReadKeyBuffered();
@@ -1432,7 +1445,7 @@ char Nastrojka() // Regim nastrojki
 				Text[0] = Key;
 				PrintXY(PosX + 2, PosY, 1);
 				temp[PosY][index] = Text[0];
-				Sleep(1000);
+				msleep(1000);
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
@@ -1441,21 +1454,22 @@ char Nastrojka() // Regim nastrojki
 			}
 			if (PosY == 10) {
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonNGrad();
 				NGrad();
 				ClrScr();
-				Sleep(500);
+				msleep(500);
 				SchablonNastrojka();
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
 				goto Nastr;
-			};
+			}
 			if (PosY == 12 && NewMedium()) {
 				return '7';
 			}
-		};
+		}
+		
 		if (Key == '9') {
 			PosY = 0;
 			//NomGrad=(temp[PosY][0]-48)*100+(temp[PosY][1]-48)*10+temp[PosY][2]-48;PosY++;PosY++;
@@ -1476,23 +1490,23 @@ char Nastrojka() // Regim nastrojki
 			UstRele = (temp[PosY][0] - 48) * 100 + (temp[PosY][1] - 48) * 10
 					+ temp[PosY][2] - 48;
 			PosY++;
-			////printf("%u",NomGrad);printf(" \n");Sleep(10000);
+			////printf("%u",NomGrad);printf(" \n");msleep(10000);
 			SaveNastr();
-			Sleep(100);
+			msleep(100);
 			Reader();
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
 			strcpy(Text, "Save Ok");
 			tempchar = PrintXY(11, 1, 7);
-			Sleep(1000);
+			msleep(1000);
 			strcpy(Text, "       ");
 			tempchar = PrintXY(11, 1, 7);
 			SetCursor(PosX, PosY);
-		}; //Save
+		} //Save
 		if (Key == '1' || Key == '3' || Key == '5') {
 			goto Exn;
-		};
+		}
 	} while (true);
 
 	goto Nastr;
@@ -1638,7 +1652,7 @@ char PeriphSetup(void) {
 					RegistrTM_int[4] = PotVal; //set potentiometer value
 					RegistrTM_int[5] = 0x40;
 					ComWriteIntReg(0x02, 0x32, 4); //setup DAC registers
-					Sleep(200);
+					msleep(200);
 					do {
 						Key = ReadKeyBuffered();
 					} while (Key == 'Z');
@@ -1653,7 +1667,7 @@ char PeriphSetup(void) {
 						Text[0] = Key;
 						PrintXY(i, PosY, 1);
 						temp[PosY - 3][i - 14] = Text[0];
-						Sleep(200);
+						msleep(200);
 						do {
 							Key = ReadKeyBuffered();
 						} while (Key == 'Z');
@@ -1677,11 +1691,11 @@ char PeriphSetup(void) {
 					+ 10 * (temp[PosY][2] - 48) + (temp[PosY][3] - 48);
 
 			SaveNastr(); //TODO Add new variables to save list
-			Sleep(100);
+			msleep(100);
 			Reader(); //TODO ADD new variables to load list
 			strcpy(Text, "Save Ok");
 			tempchar = PrintXY(11, 1, 7);
-			Sleep(1000);
+			msleep(1000);
 			strcpy(Text, "       ");
 			tempchar = PrintXY(11, 1, 7);
 			SetCursor(PosX, PosY);
@@ -1759,39 +1773,39 @@ char Porog() // Regim slugebnojn nastrojki
 		tempchar = PrintXY(12, j, 8);
 	};
 	if (Nzp == 0) {
-		strcpy(Text, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
+		strcpy(Text,"Не использ.");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	if (Nzp == 1) {
 		strcpy(Text, "alfa > por ");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	if (Nzp == 2) {
 		strcpy(Text, "alfa < por ");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	if (Nzp == 3) {
 		strcpy(Text, "beta > por ");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	if (Nzp == 4) {
 		strcpy(Text, "beta < por ");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	if (Nzp == 5) {
 		strcpy(Text, "gamma > por");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	if (Nzp == 6) {
 		strcpy(Text, "gamma < por");
 		tempchar = PrintXY(9, 7, 11);
-		Sleep(100);
+		msleep(100);
 	};
 	PosX = 0;
 	PosY = 3;
@@ -1825,9 +1839,9 @@ char Porog() // Regim slugebnojn nastrojki
 			if (PosY == 3 || PosY == 4 || PosY == 5) {
 				PosX = 12;
 				Key = 'Z';
-				for (i = PosX; i < PosX + 8; i++) { //Sleep(1000);
+				for (i = PosX; i < PosX + 8; i++) { //msleep(1000);
 					Key = 'Z';
-					SetCursor(i, PosY); //Sleep(1000);
+					SetCursor(i, PosY); //msleep(1000);
 					if (i == 16)
 						goto npl1;
 					////printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
@@ -1838,7 +1852,7 @@ char Porog() // Regim slugebnojn nastrojki
 					Text[0] = Key;
 					PrintXY(i, PosY, 1);
 					temp[PosY][i - 12] = Text[0];
-					Sleep(200);
+					msleep(200);
 					do {
 						Key = ReadKeyBuffered();
 					} while (Key != 'Z');
@@ -1854,46 +1868,46 @@ char Porog() // Regim slugebnojn nastrojki
 					Nzp = 0;
 				};
 				if (Nzp == 0) {
-					strcpy(Text, "пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ.");
+					strcpy(Text,"Не использ.");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				if (Nzp == 1) {
 					strcpy(Text, "alfa > por ");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				if (Nzp == 2) {
 					strcpy(Text, "alfa < por ");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				if (Nzp == 3) {
 					strcpy(Text, "beta > por ");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				if (Nzp == 4) {
 					strcpy(Text, "beta < por ");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				if (Nzp == 5) {
 					strcpy(Text, "gamma > por");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				if (Nzp == 6) {
 					strcpy(Text, "gamma < por");
 					tempchar = PrintXY(9, 7, 11);
-					Sleep(100);
+					msleep(100);
 				};
 				// do {Key=ReadKey();} while (Key=='Z'||Key=='S');
 				////printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 				// Text[0]=Key;
 				//  PrintXY(i,PosY,1);
 				//  temp[PosY][i-12]=Text[0];
-				//   Sleep(200);
+				//   msleep(200);
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
@@ -1923,14 +1937,14 @@ char Porog() // Regim slugebnojn nastrojki
 					+ (temp[PosY][7] - 48) * 0.001;
 			PosY++;
 
-			////printf("%u",Ku0);printf(" \n");printf("%u",Ku0);printf(" \n");  Sleep(10000);
+			////printf("%u",Ku0);printf(" \n");printf("%u",Ku0);printf(" \n");  msleep(10000);
 			////printf("Save ");printf("%f",a0);printf(" \n");
 			SaveSet();
-			Sleep(100);
+			msleep(100);
 			Reader();
 			strcpy(Text, "SaveOk");
 			tempchar = PrintXY(13, 2, 6);
-			Sleep(1000);
+			msleep(1000);
 			strcpy(Text, "      ");
 			tempchar = PrintXY(13, 2, 6);
 			SetCursor(PosX, PosY);  //////////////////////////
@@ -1955,18 +1969,18 @@ char Porog() // Regim slugebnojn nastrojki
 					+ (temp[PosY][7] - 48) * 1;
 			PosY++;
 			//printf("Saw_A1=");printf("%u",Saw_A1);printf(" \n");
-			Sleep(5000);
+			msleep(5000);
 			WriteDataSPMSet();
-			Sleep(500);
+			msleep(500);
 			EEPROMSave(0x01);
-			Sleep(500);
+			msleep(500);
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
 		};
 		if (Key == '5') {
 			ClrScr();
-			Sleep(500);
+			msleep(500);
 			Rezonans();
 			do {
 				Key = ReadKeyBuffered();
@@ -1987,7 +2001,7 @@ char Porog() // Regim slugebnojn nastrojki
 
 	Exnsl:
 
-//Sleep(10000);
+//msleep(10000);
 	return 0;
 }
 /////////////////////////////
@@ -2116,7 +2130,7 @@ char NSlug() // Regim slugebnojn nastrojki
 		temp[PosY][i - 1] = z + 48;
 	};
 	NastrSlug:
-	////printf("NGrad");printf(" \n");Sleep(30000);
+	////printf("NGrad");printf(" \n");msleep(30000);
 	for (j = 0; j < 7; j++) {
 		strcpy(Text, emptyrow);
 		for (i = 0; i < 8; i++) {
@@ -2170,9 +2184,9 @@ char NSlug() // Regim slugebnojn nastrojki
 			if (PosY == 11 || PosY == 12) {
 				PosX = 18;
 				Key = 'Z';
-				for (i = PosX; i < PosX + 2; i++) { //Sleep(1000);
+				for (i = PosX; i < PosX + 2; i++) { //msleep(1000);
 					Key = 'Z';
-					SetCursor(i, PosY); //Sleep(1000);
+					SetCursor(i, PosY); //msleep(1000);
 					////printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 					do {
 						Key = ReadKeyBuffered();
@@ -2181,7 +2195,7 @@ char NSlug() // Regim slugebnojn nastrojki
 					Text[0] = Key;
 					PrintXY(i, PosY, 1);
 					temp[PosY][i - 18] = Text[0];
-					Sleep(200);
+					msleep(200);
 					do {
 						Key = ReadKeyBuffered();
 					} while (Key != 'Z');
@@ -2190,11 +2204,11 @@ char NSlug() // Regim slugebnojn nastrojki
 			} else {
 				PosX = 12;
 				Key = 'Z';
-				for (i = PosX; i < PosX + 8; i++) {				//Sleep(1000);
+				for (i = PosX; i < PosX + 8; i++) {				//msleep(1000);
 					if (i == 16)
 						goto nsl1;
 					Key = 'Z';
-					SetCursor(i, PosY);				//Sleep(1000);
+					SetCursor(i, PosY);				//msleep(1000);
 					////printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 					do {
 						Key = ReadKeyBuffered();
@@ -2203,7 +2217,7 @@ char NSlug() // Regim slugebnojn nastrojki
 					Text[0] = Key;
 					PrintXY(i, PosY, 1);
 					temp[PosY][i - 12] = Text[0];
-					Sleep(200);
+					msleep(200);
 					do {
 						Key = ReadKeyBuffered();
 					} while (Key != 'Z');
@@ -2257,17 +2271,17 @@ char NSlug() // Regim slugebnojn nastrojki
 			Ku0 = (temp[12][0] - 48) * 10 + temp[12][1] - 48;
 			Ku1 = (temp[12][0] - 48) * 10 + temp[12][1] - 48;
 
-			////printf("%u",Ku0);printf(" \n");printf("%u",Ku0);printf(" \n");  Sleep(10000);
+			////printf("%u",Ku0);printf(" \n");printf("%u",Ku0);printf(" \n");  msleep(10000);
 			////printf("Save ");printf("%f",a0);printf(" \n");
 			SaveSet();
-			Sleep(100);
+			msleep(100);
 			Reader();
 			Va = Saw_A1;
 			WriteDataSPMSet();
-			Sleep(500);
+			msleep(500);
 			strcpy(Text, "SaveOk");
 			tempchar = PrintXY(13, 2, 6);
-			Sleep(1000);
+			msleep(1000);
 			strcpy(Text, "      ");
 			tempchar = PrintXY(13, 2, 6);
 			SetCursor(PosX, PosY);  //////////////////////////
@@ -2292,18 +2306,18 @@ char NSlug() // Regim slugebnojn nastrojki
 					+ (temp[PosY][7] - 48) * 1;
 			PosY++;
 			//printf("Saw_A1=");printf("%u",Saw_A1);printf(" \n");
-			Sleep(5000);
+			msleep(5000);
 			WriteDataSPMSet();
-			Sleep(500);
+			msleep(500);
 			EEPROMSave(0x01);
-			Sleep(500);
+			msleep(500);
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
 		};
 		if (Key == '5') {
 			ClrScr();
-			Sleep(500);
+			msleep(500);
 			Rezonans();
 			do {
 				Key = ReadKeyBuffered();
@@ -2335,43 +2349,43 @@ char Rezonans() // Poisk rezonansa
 	char tempchar;
 	float y, z;
 
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ     ");
+	strcpy(Text,"Поиск резонанса     ");
 	tempchar = PrintXY(0, 0, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ            ");
+	strcpy(Text,"Подпорка            ");
 	tempchar = PrintXY(0, 3, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ               ");
+	strcpy(Text,"Альфа               ");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅ                ");
+	strcpy(Text,"Бета                ");
 	tempchar = PrintXY(0, 6, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ               ");
+	strcpy(Text,"Гамма               ");
 	tempchar = PrintXY(0, 7, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅ        пїЅ");
+	strcpy(Text,"Нач. поиска        В");
 	tempchar = PrintXY(0, 9, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅ        пїЅ");
+	strcpy(Text,"Кон. поиска        В");
 	tempchar = PrintXY(0, 10, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ         пїЅ");
+	strcpy(Text,"Шаг поиска         В");
 	tempchar = PrintXY(0, 11, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F3 -пїЅпїЅпїЅпїЅпїЅ           ");
+	strcpy(Text,"F3 -Поиск           ");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "Sh-пїЅпїЅпїЅ F5-пїЅпїЅпїЅпїЅ пїЅ-пїЅпїЅпїЅ");
+	strcpy(Text,"Sh-Ред F5-Сохр С-вых");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -2459,11 +2473,11 @@ char Rezonans() // Poisk rezonansa
 		if (Key == 'S') { //printf("%x",Key);printf(" \n");
 			PosX = 12;
 			Key = 'Z';
-			for (i = PosX; i < PosX + 8; i++) { //Sleep(1000);
+			for (i = PosX; i < PosX + 8; i++) { //msleep(1000);
 				if (i == 16)
 					goto nr1;
 				Key = 'Z';
-				SetCursor(i, PosY); //Sleep(1000);
+				SetCursor(i, PosY); //msleep(1000);
 				////printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 				do {
 					Key = ReadKeyBuffered();
@@ -2472,7 +2486,7 @@ char Rezonans() // Poisk rezonansa
 				Text[0] = Key;
 				PrintXY(i, PosY, 1);
 				temp[PosY][i - 12] = Text[0];
-				Sleep(200);
+				msleep(200);
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
@@ -2484,7 +2498,7 @@ char Rezonans() // Poisk rezonansa
 		};
 		if (Key == '9') {
 			PosY = 9;
-			//     //printf("%f",N_Rez);printf("  "); printf("%f",K_Rez);printf("  ");printf("%f",Step_Rez);printf("\n"); Sleep(5000);
+			//     //printf("%f",N_Rez);printf("  "); printf("%f",K_Rez);printf("  ");printf("%f",Step_Rez);printf("\n"); msleep(5000);
 			N_Rez = (temp[PosY][0] - 48) * 1000 + (temp[PosY][1] - 48) * 100
 					+ (temp[PosY][2] - 48) * 10 + (temp[PosY][3] - 48)
 					+ (temp[PosY][5] - 48) * 0.1 + (temp[PosY][6] - 48) * 0.01
@@ -2500,16 +2514,16 @@ char Rezonans() // Poisk rezonansa
 					+ (temp[PosY][5] - 48) * 0.1 + (temp[PosY][6] - 48) * 0.01
 					+ (temp[PosY][7] - 48) * 0.001;
 			PosY++;
-			//  //printf("%f",N_Rez);printf("  "); printf("%f",K_Rez);printf("  ");printf("%f",Step_Rez);printf("\n"); Sleep(5000);
+			//  //printf("%f",N_Rez);printf("  "); printf("%f",K_Rez);printf("  ");printf("%f",Step_Rez);printf("\n"); msleep(5000);
 			SaveNastr();
-			Sleep(100);
+			msleep(100);
 			Reader();				//do {Key=ReadKey();} while (Key!='Z');
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
 			strcpy(Text, "Save Ok");
 			tempchar = PrintXY(11, 1, 7);
-			Sleep(1000);
+			msleep(1000);
 			strcpy(Text, "       ");
 			tempchar = PrintXY(11, 1, 7);
 			SetCursor(PosX, PosY);
@@ -2522,7 +2536,7 @@ char Rezonans() // Poisk rezonansa
 			PosY = 0;
 			Saw_A0 = N_Rez * 1000;
 			//ComCMode(0x01,0x01);
-			Sleep(1000);
+			msleep(1000);
 			do {
 				PosY = 3;
 				y = Saw_A0;
@@ -2540,14 +2554,14 @@ char Rezonans() // Poisk rezonansa
 					Text[i] = temp[PosY][i];
 					tempchar = PrintXY(12, PosY, 8);
 				};
-				Sleep(1000);
+				msleep(1000);
 				WriteDataSPMSet();
-				Sleep(1000);
+				msleep(1000);
 				//ComCMode(0x01,0x00);
-				Sleep(2000);
+				msleep(2000);
 				ReadDataSPMCurrent();
 				//printf("%u",Saw_A0);//printf(" ");printf("%u",Am0);printf(" ");printf("%u",Haw0);printf(" ");printf("%u",Gamma0);printf("\n");
-				Sleep(1000);
+				msleep(1000);
 				PosY = 5;
 				y = Am0 * 1000;
 				for (i = 8; i != 0; i--) {
@@ -2604,6 +2618,7 @@ char Rezonans() // Poisk rezonansa
 }
 
 bool NewMedium() {
+	printf("\nNew medium init...");
 	newMediumStr[0] = 0;
 	ClrScr();
 
@@ -2632,7 +2647,7 @@ bool NewMedium() {
 
 char VirtualKeyboard(char * buffer) {
 	ClrScr();
-	SchablonKeyboard(" пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ: ", buffer);
+	SchablonKeyboard(" Новая градуировка: ", buffer);
 
 	char tempchar = 0;
 	int charindex = strlen(buffer);
@@ -2646,22 +2661,22 @@ char VirtualKeyboard(char * buffer) {
 		case '4':
 			if (charindex > 0)
 				charindex--;
-			Sleep(500);
+			msleep(500);
 			break;
 		case '6':
 			if (charindex < strlen(abc_ru) - 1)
 				charindex++;
-			Sleep(500);
+			msleep(500);
 			break;
 		case '8':
 			if (charindex > 19)
 				charindex -= 20;
-			Sleep(500);
+			msleep(500);
 			break;
 		case '2':
 			if (charindex <= 22)
 				charindex += 20;
-			Sleep(500);
+			msleep(500);
 			break;
 		case 'S':
 			if (index < 19) {
@@ -2682,7 +2697,7 @@ char VirtualKeyboard(char * buffer) {
 			char * fullrow = GetFullRow(buffer);
 			strcpy(Text, fullrow);
 			PrintXY(0, 2, 20);
-			Sleep(1000);
+			msleep(1000);
 		}
 
 		if (tempchar == '4' || tempchar == '6' || tempchar == '8'
@@ -3011,7 +3026,7 @@ char NGrad() // Regim nastrojki
 	PosY++;
 
 	NastrGrad:
-	////printf("NGrad");printf(" \n");Sleep(30000);
+	////printf("NGrad");printf(" \n");msleep(30000);
 	for (j = 0; j < 15; j++) {
 		strcpy(Text, emptyrow);
 		for (i = 0; i < 9; i++) {
@@ -3050,11 +3065,11 @@ char NGrad() // Regim nastrojki
 		if (Key == 'S') { ////printf("%x",Key);printf(" \n");
 			PosX = 6;
 			Key = 'Z';
-			for (i = PosX; i < PosX + 9; i++) { //Sleep(1000);
+			for (i = PosX; i < PosX + 9; i++) { //msleep(1000);
 				if (i == 10)
 					goto ng1;
 				Key = 'Z';
-				SetCursor(i, PosY); //Sleep(1000);
+				SetCursor(i, PosY); //msleep(1000);
 				////printf("%x",Key);printf("  ");printf("%u",i);printf(" \n");
 				do {
 					ng3: Key = ReadKeyBuffered();
@@ -3070,7 +3085,7 @@ char NGrad() // Regim nastrojki
 				ng2: Text[0] = Key;
 				PrintXY(i, PosY, 1);
 				temp[PosY][i - 6] = Text[0];
-				Sleep(200);
+				msleep(200);
 				do {
 					Key = ReadKeyBuffered();
 				} while (Key != 'Z');
@@ -3188,14 +3203,14 @@ char NGrad() // Regim nastrojki
 			PosY++;
 			////printf("Save ");printf("%f",a0);printf(" \n");
 			SaveGrad();
-			Sleep(100);
+			msleep(100);
 			Reader();
 			do {
 				Key = ReadKeyBuffered();
 			} while (Key != 'Z');
 			strcpy(Text, "SaveOk");
 			tempchar = PrintXY(14, 1, 6);
-			Sleep(1000);
+			msleep(1000);
 			strcpy(Text, "      ");
 			tempchar = PrintXY(14, 1, 6);
 			SetCursor(PosX, PosY);
@@ -3229,11 +3244,11 @@ char SchablonNSlug() // Schablon ekrana
 	char tempchar;
 	////printf("Schablon");printf(" \n");SleepWithService(3000);
 
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ   =        ");
+	strcpy(Text,"Подпорка   =        ");
 	tempchar = PrintXY(0, 0, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  =        ");
+	strcpy(Text,"Амплитуда  =        ");
 	tempchar = PrintXY(0, 1, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3255,32 +3270,32 @@ char SchablonNSlug() // Schablon ekrana
 	printf("%x", tempchar);
 	printf(" \n");
 	// strcpy(Text,"                    ");  tempchar=PrintXY(0,12,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ     ");
+	strcpy(Text,"Кол-во датчиков     ");
 	tempchar = PrintXY(0, 8, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 1      ");
+	strcpy(Text,"Ном. датчика 1      ");
 	tempchar = PrintXY(0, 9, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ 2      ");
+	strcpy(Text,"Ном. датчика 2      ");
 	tempchar = PrintXY(0, 10, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅ        ");
+	strcpy(Text,"Ном. прибора        ");
 	tempchar = PrintXY(0, 11, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅ-пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ        ");
+	strcpy(Text,"К-т усиления        ");
 	tempchar = PrintXY(0, 12, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	// strcpy(Text,"                    ");  tempchar=PrintXY(0,13,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text, "F3 -пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ");
+	strcpy(Text,"F3 -Поиск резонанса ");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "Sh-пїЅпїЅпїЅ F5-пїЅпїЅпїЅпїЅ пїЅ-пїЅпїЅпїЅ");
+	strcpy(Text,"Sh-Ред F5-Сохр С-вых");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3295,28 +3310,28 @@ char SchablonPorog() // Schablon ekrana
 	char tempchar;
 	//printf("Schablon");printf(" \n");SleepWithService(3000);
 
-	strcpy(Text, "    пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ    ");
+	strcpy(Text,"    Выбор порога    ");
 	tempchar = PrintXY(0, 0, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ alfa          ");
+	strcpy(Text,"Порог alfa          ");
 	tempchar = PrintXY(0, 3, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ beta          ");
+	strcpy(Text,"Порог beta          ");
 	tempchar = PrintXY(0, 4, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ gamma         ");
+	strcpy(Text,"Порог gamma         ");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ             ");
+	strcpy(Text,"Условие             ");
 	tempchar = PrintXY(0, 7, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 
-	strcpy(Text, "Sh-пїЅпїЅпїЅ F5-пїЅпїЅпїЅпїЅ пїЅ-пїЅпїЅпїЅ");
+	strcpy(Text,"Sh-Ред F5-Сохр С-вых");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3391,7 +3406,7 @@ char SchablonNGrad() // Schablon ekrana
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "Sh-пїЅпїЅпїЅ F5-пїЅпїЅпїЅпїЅ пїЅ-пїЅпїЅпїЅ");
+	strcpy(Text,"Sh-Ред F5-Сохр С-вых");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3407,65 +3422,65 @@ char SchablonNastrojka() // Schablon ekrana
 	//char pos=0;
 	char tempchar;
 
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ :             ");
+	strcpy(Text,"Среда :             ");
 	tempchar = PrintXY(0, 0, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.      пїЅ");
+	strcpy(Text,"Время заполн.      с");
 	tempchar = PrintXY(0, 2, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.       пїЅ");
+	strcpy(Text,"Время очист.       с");
 	tempchar = PrintXY(0, 3, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ.       пїЅ");
+	strcpy(Text,"Время измер.       с");
 	tempchar = PrintXY(0, 4, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.     пїЅ");
+	strcpy(Text,"Период калибр.     с");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ     . %");
+	strcpy(Text,"Уставка реле     . %");
 	tempchar = PrintXY(0, 6, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.         ");
+	strcpy(Text,"Тип калибр.         ");
 	tempchar = PrintXY(0, 7, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ. пїЅпїЅпїЅ. ");
+	strcpy(Text,"Настройка ток. вых. ");
 	tempchar = PrintXY(0, 8, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ.     ");
+	strcpy(Text,"Служебн. настр.     ");
 	tempchar = PrintXY(0, 9, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅ.     ");
+	strcpy(Text,"Градуир. коэфф.     ");
 	tempchar = PrintXY(0, 10, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ        ");
+	strcpy(Text,"Выбор порога        ");
 	tempchar = PrintXY(0, 11, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ         ");
+	strcpy(Text,"Новая среда         ");
 	tempchar = PrintXY(0, 12, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "Sh-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ    ");
+	strcpy(Text,"Sh-Редактировать    ");
 	tempchar = PrintXY(0, 13, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F1-пїЅпїЅпїЅпїЅпїЅпїЅ F2-пїЅпїЅпїЅпїЅ.  ");
+	strcpy(Text,"F1-Работа F2-Град.  ");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F3-пїЅпїЅпїЅпїЅпїЅпїЅ F5-пїЅпїЅпїЅпїЅпїЅпїЅ.");
+	strcpy(Text,"F3-Калибр F5-Сохран.");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3487,26 +3502,26 @@ char SchablonRabota() // Schablon ekrana
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅ       ");
+	strcpy(Text,"Режим: Работа       ");
 	tempchar = PrintXY(0, 2, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:         %");
+	strcpy(Text,"ВЛАЖНОСТЬ:         %");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 
-	strcpy(Text, "пїЅ пїЅпїЅпїЅпїЅпїЅ:           пїЅ");
+	strcpy(Text,"Т среды:           С");
 	tempchar = PrintXY(0, 8, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 
-	strcpy(Text, "F2-пїЅпїЅпїЅпїЅ.  F3-пїЅпїЅпїЅпїЅпїЅпїЅ.");
+	strcpy(Text,"F2-Град.  F3-Калибр.");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F4-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ        ");
+	strcpy(Text,"F4-Настройка        ");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3528,47 +3543,45 @@ char SchablonGrad() // Schablon ekrana
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ  ");
+	strcpy(Text,"Режим: Градуировка  ");
 	tempchar = PrintXY(0, 2, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	//strcpy(Text,"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:  пїЅпїЅпїЅпїЅпїЅпїЅ:  "); tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
-	//strcpy(Text,"                    "); tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:         %");
+	strcpy(Text,"Влажность:         %");
 	tempchar = PrintXY(0, 4, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ:         пїЅ");
+	strcpy(Text,"Т датчика:         С");
 	tempchar = PrintXY(0, 6, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅ пїЅпїЅпїЅпїЅпїЅ:           пїЅ");
+	strcpy(Text,"Т среды:           С");
 	tempchar = PrintXY(0, 7, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ2:        пїЅ");
+	strcpy(Text,"Т датчика2:        С");
 	tempchar = PrintXY(0, 8, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ:              ");
+	strcpy(Text,"Альфа:              ");
 	tempchar = PrintXY(0, 10, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅ :              ");
+	strcpy(Text,"Бета :              ");
 	tempchar = PrintXY(0, 11, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ:              ");
+	strcpy(Text,"Гамма:              ");
 	tempchar = PrintXY(0, 12, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "F1-пїЅпїЅпїЅпїЅпїЅпїЅ F3-пїЅпїЅпїЅпїЅпїЅпїЅ.");
+	strcpy(Text,"F1-Работа F3-Калибр.");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F4-пїЅпїЅпїЅпїЅпїЅ. F5-пїЅпїЅпїЅпїЅпїЅпїЅ.");
+	strcpy(Text,"F4-Настр. F5-Сохран.");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3590,47 +3603,45 @@ char SchablonKalibr() // Schablon ekrana
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ: пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ   ");
+	strcpy(Text,"Режим: Калибровка   ");
 	tempchar = PrintXY(0, 2, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	//strcpy(Text,"пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ:  пїЅпїЅпїЅпїЅпїЅпїЅ:  "); tempchar=PrintXY(0,3,20);printf("%x",tempchar);printf(" \n");
-	//strcpy(Text,"                    "); tempchar=PrintXY(0,4,20);printf("%x",tempchar);printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ0:     пїЅпїЅ:     ");
+	strcpy(Text,"Альфа0:     Тг:     ");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅ0 :     пїЅпїЅ:     ");
+	strcpy(Text,"Бета0 :     Тс:     ");
 	tempchar = PrintXY(0, 6, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ0:             ");
+	strcpy(Text,"Гамма0:             ");
 	tempchar = PrintXY(0, 7, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ :     пїЅпїЅ:     ");
+	strcpy(Text,"Альфа :     Тг:     ");
 	tempchar = PrintXY(0, 9, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅ  :     пїЅпїЅ:     ");
+	strcpy(Text,"Бета  :     Тс:     ");
 	tempchar = PrintXY(0, 10, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅ :             ");
+	strcpy(Text,"Гамма :             ");
 	tempchar = PrintXY(0, 11, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 	//
-	strcpy(Text, "F3-пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ       ");
+	strcpy(Text,"F3-Калибровка       ");
 	tempchar = PrintXY(0, 13, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F1-пїЅпїЅпїЅпїЅпїЅпїЅ F2-пїЅпїЅпїЅпїЅ.  ");
+	strcpy(Text,"F1-Работа F2-Град.  ");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F4-пїЅпїЅпїЅпїЅпїЅ. F5-пїЅпїЅпїЅпїЅпїЅпїЅ.");
+	strcpy(Text,"F4-Настр. F5-Сохран.");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3649,40 +3660,40 @@ void SchablonKeyboard(char * title, char * buffer) {
 		printf("%x", tempchar);
 		printf(" \n");
 	};
-	strcpy(Text, "Up-пїЅпїЅпїЅпїЅпїЅ Dn-пїЅпїЅпїЅпїЅ    ");
+	strcpy(Text,"Up-Вверх Dn-Вниз    ");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "Lf-пїЅпїЅпїЅпїЅпїЅ Rg-пїЅпїЅпїЅпїЅпїЅпїЅ  ");
+	strcpy(Text,"Lf-Влево Rg-Вправо  ");
 	tempchar = PrintXY(0, 6, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+	strcpy(Text,"абвгде жзийклмнопрст");
 	tempchar = PrintXY(0, 9, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ1234567");
+	strcpy(Text,"уфхцчшщъыьэюя1234567");
 	tempchar = PrintXY(0, 10, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "890                 ");
+	strcpy(Text,"890                 ");
 	tempchar = PrintXY(0, 11, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "Sh-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ C-пїЅпїЅпїЅпїЅпїЅпїЅпїЅ");
+	strcpy(Text,"Sh-Вставка C-Стереть");
 	tempchar = PrintXY(0, 12, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F5-пїЅпїЅпїЅпїЅпїЅпїЅ           ");
+	strcpy(Text,"F5-Готово           ");
 	tempchar = PrintXY(0, 13, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F1-пїЅпїЅпїЅпїЅпїЅпїЅ F2-пїЅпїЅпїЅпїЅ.  ");
+	strcpy(Text,"F1-Работа F2-Град.  ");
 	tempchar = PrintXY(0, 14, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "F3-пїЅпїЅпїЅпїЅпїЅпїЅ. F4-пїЅпїЅпїЅпїЅпїЅ.");
+	strcpy(Text,"F3-Калибр. F4-Настр.");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3699,32 +3710,32 @@ char ShablonPeriphSetup() {
 	char tempchar;
 	//printf("Schablon");printf(" \n");SleepWithService(3000);
 
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ. пїЅпїЅпїЅ. ");
+	strcpy(Text,"Настройка ток. вых. ");
 	tempchar = PrintXY(0, 0, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ:       пїЅпїЅ");
+	strcpy(Text,"Тип выхода:       мА");
 	tempchar = PrintXY(0, 2, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ:       ");
+	strcpy(Text,"Смещение ЦАП:       ");
 	tempchar = PrintXY(0, 3, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ:        ");
+	strcpy(Text,"Масштаб ЦАП:        ");
 	tempchar = PrintXY(0, 4, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅ.пїЅпїЅпїЅпїЅпїЅпїЅ.:       ");
+	strcpy(Text,"Знач.потенц.:       ");
 	tempchar = PrintXY(0, 5, 20);
 	printf("%x", tempchar);
 	printf(" \n");
-	strcpy(Text, "пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ            ");
+	strcpy(Text,"Тест ЦАП            ");
 	tempchar = PrintXY(0, 6, 20);
 	printf("%x", tempchar);
 	printf(" \n");
 
-	strcpy(Text, "Sh-пїЅпїЅпїЅ F5-пїЅпїЅпїЅпїЅ пїЅ-пїЅпїЅпїЅ");
+	strcpy(Text,"Sh-Ред F5-Сохр С-вых");
 	tempchar = PrintXY(0, 15, 20);
 	printf("%x", tempchar);
 	printf(" \n");
@@ -3760,7 +3771,9 @@ char PrintXY(byte X, byte Y, byte length) // Pechat stroki simvolov
 		//4 - esli error - CRC
 		//4 - esli OK - net
 		{
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
+	
 	int i;
 	char len;
 	char pos = 0;
@@ -3789,8 +3802,11 @@ char PrintXY(byte X, byte Y, byte length) // Pechat stroki simvolov
 	};
 	//printf("\n");
 
-	DWORD ret = 0;
-	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);*/
+	if (write(hCom1,ComDataWrite,len)<0){
+		printf("Port write error");
+		}
 
 	//Read:
 	//OK:    Error:
@@ -3801,7 +3817,10 @@ char PrintXY(byte X, byte Y, byte length) // Pechat stroki simvolov
 	// CRC        //byte 3 byte 4
 	len = 4; //SleepWithService(100);
 
-	ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	//ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	if (read(hCom1, ComDataRead,len)<0){
+		printf("Read error");
+		}
 	for (i = 0; i < len; i++) {
 		printf("%x", ComDataRead[i]);
 		printf(" ");
@@ -3810,15 +3829,18 @@ char PrintXY(byte X, byte Y, byte length) // Pechat stroki simvolov
 	//SleepWithService(1000);
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -3829,7 +3851,8 @@ char PrintXY(byte X, byte Y, byte length) // Pechat stroki simvolov
 	//proverka CRC
 	//if (ComDataRead[len]!=ComDataRead[len+2] ||
 	//  ComDataRead[len+1]!=ComDataRead[len+1+2]) return 12;
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -3860,7 +3883,8 @@ char SetCursor(byte X, byte Y) // Ustanovka kursora
 		//4 - esli error - CRC
 		//4 - esli OK - net
 		{
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
 	int i;
 	char len;
 	char pos = 0;
@@ -3883,8 +3907,11 @@ char SetCursor(byte X, byte Y) // Ustanovka kursora
 		printf(" ");
 	};
 	//printf("\n");
-	DWORD ret = 0;
-	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);*/
+	if (write(hCom1,ComDataWrite,len)<0){
+		printf("Port write error");
+		}	
 
 	//Read:
 	//OK:    Error:
@@ -3895,7 +3922,10 @@ char SetCursor(byte X, byte Y) // Ustanovka kursora
 	// CRC        //byte 3 byte 4
 	//len=4;	  
 
-	ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	//ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	if (read(hCom1, ComDataRead,len)<0){
+		printf("Read error");
+		}	
 	for (i = 0; i < len; i++) {
 		printf("%x", ComDataRead[i]);
 		printf(" ");
@@ -3904,15 +3934,18 @@ char SetCursor(byte X, byte Y) // Ustanovka kursora
 
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -3923,10 +3956,12 @@ char SetCursor(byte X, byte Y) // Ustanovka kursora
 	//proverka CRC
 	if (ComDataRead[len] != ComDataRead[len + 2]
 			|| ComDataRead[len + 1] != ComDataRead[len + 1 + 2]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 12;
 	}
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -3955,7 +3990,8 @@ char ClrScr() // Ochistka ekrana
 //4 - esli error - CRC
 //4 - esli OK - net
 {
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
 	int i;
 	char len;
 	char pos = 0;
@@ -3975,8 +4011,11 @@ char ClrScr() // Ochistka ekrana
 		printf(" ");
 	};
 	//printf("\n");
-	DWORD ret = 0;
-	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);*/
+	if (write(hCom1,ComDataWrite,len)<0){
+		printf("Port write error");
+		}	
 
 	//Read:
 	//OK:    Error:
@@ -3987,7 +4026,10 @@ char ClrScr() // Ochistka ekrana
 	// CRC        //byte 3 byte 4
 	len = 4;
 
-	ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	//ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	if (read(hCom1, ComDataRead,len)<0){
+		printf("Read error");
+		}	
 	for (i = 0; i < len; i++) {
 		printf("%x", ComDataRead[i]);
 		printf(" ");
@@ -3996,15 +4038,18 @@ char ClrScr() // Ochistka ekrana
 
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -4015,10 +4060,12 @@ char ClrScr() // Ochistka ekrana
 	//proverka CRC
 	if (ComDataRead[len] != ComDataRead[len + 2]
 			|| ComDataRead[len + 1] != ComDataRead[len + 1 + 2]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 12;
 	}
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -4047,7 +4094,8 @@ char EEPROMSave(char UstrAdr) // Zapis v EEPROM
 		//4 - esli error - CRC
 		//4 - esli OK - net
 		{
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
 	char len;
 	char pos = 0;
 
@@ -4063,8 +4111,11 @@ char EEPROMSave(char UstrAdr) // Zapis v EEPROM
 	len = pos + 2;
 	//for (i=0;i<len;i++) {printf("%x",ComDataWrite[i]);printf(" ");};
 	//printf("\n");
-	DWORD ret = 0;
-	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);*/
+	if (write(hCom1,ComDataWrite,len)<0){
+		printf("Port write error");
+		}	
 
 	//Read:
 	//OK:    Error:
@@ -4075,19 +4126,24 @@ char EEPROMSave(char UstrAdr) // Zapis v EEPROM
 	// CRC        //byte 3 byte 4
 	len = 4;
 
-	ReadFile(hCom1, ComDataRead, len, &ret, NULL);
-
+	//ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	if (read(hCom1, ComDataRead,len)<0){
+		printf("Read error");
+		}
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -4098,10 +4154,12 @@ char EEPROMSave(char UstrAdr) // Zapis v EEPROM
 	//proverka CRC
 	if (ComDataRead[len] != ComDataRead[len + 2]
 			|| ComDataRead[len + 1] != ComDataRead[len + 1 + 2]) {
-		LeaveCriticalSection(g_LockData);
+				//LeaveCriticalSection(g_LockData);
+				pthread_mutex_unlock(&mutex1);
 		return 12;
 	}
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -4175,24 +4233,29 @@ char ComWriteIntReg(char UstrAdr, char StartAdr, char Length) // Zapis registrov
 		//4 - esli error - CRC
 		//4 - esli OK - net
 		{
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
 	if (UstrAdr < 1 || UstrAdr > 2) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	};
 	if (UstrAdr == 1) {
 		if (StartAdr > 0x16 || StartAdr + Length > 0x17) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 13;
 		};
 	};
 	if (UstrAdr == 2) {
 		if (StartAdr < 0x30) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 13;
 		};
 		if (StartAdr > 0x35 || StartAdr + Length > 0x36) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 13;
 		};
 	};
@@ -4234,14 +4297,16 @@ char ComWriteIntReg(char UstrAdr, char StartAdr, char Length) // Zapis registrov
 
 	//Peredacha komandnoj stroki i priem otveta
 	len = pos + 2;
-	//printf("%x",length); printf("\n");
+	printf("\nTX->");
 	for (i = 0; i < len; i++) {
-		printf("%x", ComDataWrite[i]);
-		printf(" ");
+		printf("%x ", ComDataWrite[i]);
 	};
 	//printf("\n");
-	DWORD ret = 0;
-	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom1, ComDataWrite, len, &ret, NULL);*/
+	if (write(hCom1,ComDataWrite,len)<0){
+		printf("\nPort write error");
+		}	
 
 	//Read:
 	//OK:    Error:
@@ -4251,24 +4316,30 @@ char ComWriteIntReg(char UstrAdr, char StartAdr, char Length) // Zapis registrov
 	//CRC         //byte 2 byte 3
 	// CRC        //byte 3 byte 4
 	len = 4;
-	ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	//ReadFile(hCom1, ComDataRead, len, &ret, NULL);
+	if (read(hCom1, ComDataRead,len)<0){
+		printf("\nRead error");
+		}
+	printf("\nRX<-");
 	for (i = 0; i < len; i++) {
-		printf("%x", ComDataRead[i]);
-		printf(" ");
+		printf("%x ", ComDataRead[i]);
 	};
 	//printf("\n");
 
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -4279,10 +4350,12 @@ char ComWriteIntReg(char UstrAdr, char StartAdr, char Length) // Zapis registrov
 	//proverka CRC
 	if (ComDataRead[len] != ComDataRead[len + 2]
 			|| ComDataRead[len + 1] != ComDataRead[len + 1 + 2]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 12;
 	}
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -4398,24 +4471,29 @@ char ComReadIntReg(char UstrAdr, char StartAdr, char Length) // Chtenie registro
 		//3-4-esli error - CRC
 		//(Length*2)+2... (Length*2)+3 - esli OK - CRC
 		{
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
 	if (UstrAdr < 1 || UstrAdr > 2) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	};
 	if (UstrAdr == 1) {
 		if (StartAdr > 0x16 || StartAdr + Length > 0x17) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 13;
 		};
 	};
 	if (UstrAdr == 2) {
 		if (StartAdr < 0x30) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 13;
 		};
 		if (StartAdr > 0x35 || StartAdr + Length > 0x36) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 13;
 		};
 	};
@@ -4438,8 +4516,11 @@ char ComReadIntReg(char UstrAdr, char StartAdr, char Length) // Chtenie registro
 	lenr = pos + 2;
 
 	//Peredacha komandnoj stroki i priem otveta
-	DWORD ret = 0;
-	WriteFile(hCom1, ComDataWrite, lenr, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom1, ComDataWrite, lenr, &ret, NULL);*/
+	if (write(hCom1,ComDataWrite,lenr)<0){
+		printf("\nPort write error");
+		}	
 	//printf("%x",length);
 	printf("\nTX:->");
 	for (i = 0; i < lenr; i++) {
@@ -4453,7 +4534,10 @@ char ComReadIntReg(char UstrAdr, char StartAdr, char Length) // Chtenie registro
 	//CRC         //byte 2 byte 3
 	// CRC        //byte 3 byte 4
 	lenr = (Length * 2) + 4;
-	ReadFile(hCom1, ComDataRead, lenr, &ret, NULL);
+	//ReadFile(hCom1, ComDataRead, lenr, &ret, NULL);
+	if (read(hCom1, ComDataRead,lenr)<0){
+		printf("\nRead error");
+		}	
 	printf("\nRX:<-");
 	for (i = 0; i < lenr; i++) {
 		printf("%x ", ComDataRead[i]);
@@ -4462,15 +4546,18 @@ char ComReadIntReg(char UstrAdr, char StartAdr, char Length) // Chtenie registro
 
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -4483,7 +4570,8 @@ char ComReadIntReg(char UstrAdr, char StartAdr, char Length) // Chtenie registro
 	if (ComDataRead[(Length * 2) + 2] != ComDataRead[(Length * 2) + 2 + 2]
 			|| ComDataRead[(Length * 2) + 3]
 					!= ComDataRead[(Length * 2) + 3 + 2]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 12;
 	}
 	if (UstrAdr == 1) {
@@ -4502,7 +4590,8 @@ char ComReadIntReg(char UstrAdr, char StartAdr, char Length) // Chtenie registro
 			// printf("%u",RegistrTM_int[StartAdr+i]);printf("\n");
 		};
 	};
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -4529,7 +4618,8 @@ char ComCMode(char UstrAdr, char UstrFuncArgument) // Ustanovka regima raboti
 		//0x03 - err data
 		//2-3 (ili 3-4)-UstrCRC - (2 byte);
 		{
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);
 	int i;
 	char pos = 0;
 	byte length;
@@ -4545,15 +4635,21 @@ char ComCMode(char UstrAdr, char UstrFuncArgument) // Ustanovka regima raboti
 
 	//Peredacha komandnoj stroki i priem otveta
 	if (UstrAdr == 0x1 || UstrAdr == 0x2) {
-		DWORD ret = 0;
-		WriteFile(hCom1, ComDataWrite, length, &ret, NULL);
+		/*DWORD ret = 0;
+		WriteFile(hCom1, ComDataWrite, length, &ret, NULL);*/
 		//printf("%x",length); printf("\n");
+		if (write(hCom1,ComDataWrite,length)<0){
+			printf("Port write error");
+			}		
 		for (i = 0; i < length; i++) {
 			printf("%x", ComDataWrite[i]);
 			printf(" ");
 		};
 		//printf("       ");
-		ReadFile(hCom1, ComDataRead, length - 1, &ret, NULL);
+		//ReadFile(hCom1, ComDataRead, length - 1, &ret, NULL);
+		if (read(hCom1, ComDataRead,length-1)<0){
+			printf("Read error");
+		}
 	};
 	if (UstrAdr == 3) {
 		//WriteFile(hCom2,&ComDataWrite,length,&ret,NULL);
@@ -4576,7 +4672,8 @@ char ComCMode(char UstrAdr, char UstrFuncArgument) // Ustanovka regima raboti
 	//   printf("\n");
 	//proverka CRC
 	// if (ComDataRead[2]!=ComDataRead[2+2] || ComDataRead[3]!=ComDataRead[3+2]) return 12;
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 /////////////////////////////
@@ -4619,7 +4716,7 @@ char CRCcount(char rw, byte Ln) // Vichislenie CRC
 char IniCom1(int BaudRate)   //initializacija COM1
 		//vozvrat: 0- norm; 1-error1; 2-error2;
 		{
-	hCom1 = CreateFile(TEXT("COM1"), GENERIC_READ | GENERIC_WRITE, 0, // comm devices must be opened w/exclusive-access
+	/*hCom1 = CreateFile(TEXT("COM1"), GENERIC_READ | GENERIC_WRITE, 0, // comm devices must be opened w/exclusive-access
 			NULL,            // no security attrs
 			OPEN_EXISTING,   // comm devices must use OPEN_EXISTING
 			0,               // not overlapped I/O
@@ -4654,8 +4751,24 @@ char IniCom1(int BaudRate)   //initializacija COM1
 	if (!success) {
 		printf(" fail Com1\n");
 		return 2;
-	};     // fail
-	ReadKey();
+	};     // fail*/
+	printf("Init port 1\n");
+	hCom1=open("/dev/ttyS0",O_RDWR | O_NOCTTY | O_NDELAY);
+	if(hCom1 == -1){
+		printf("Enable open port 1 \n");
+		}
+		else{
+			struct termios options;
+			tcgetattr(hCom1,&options); //read current settings
+			cfsetispeed(&options, B19200);
+			cfsetospeed(&options, B19200);
+			options.c_cflag &= ~PARENB; //parity control off
+			options.c_cflag &= ~CSTOPB;
+			options.c_cflag &= ~CSIZE;
+			options.c_cflag |= CS8; //on 8 bit mode
+			tcsetattr(hCom1, TCSANOW, &options); //save options			
+			}
+	
 	//printf("Com1 complit\n");
 	//printf("BaudRate="); printf("%i",BaudRate);
 	//printf("\n");
@@ -4669,7 +4782,7 @@ char IniCom1(int BaudRate)   //initializacija COM1
 char IniCom2(int BaudRate)   //initializacija COM2
 		//vozvrat: 0- norm; 1-error1; 2-error2;
 		{
-	hCom2 = CreateFile(TEXT("COM2"), GENERIC_READ | GENERIC_WRITE, 0, // comm devices must be opened w/exclusive-access
+	/*hCom2 = CreateFile(TEXT("COM2"), GENERIC_READ | GENERIC_WRITE, 0, // comm devices must be opened w/exclusive-access
 			NULL,            // no security attrs
 			OPEN_EXISTING,   // comm devices must use OPEN_EXISTING
 			0,               // not overlapped I/O
@@ -4697,8 +4810,23 @@ char IniCom2(int BaudRate)   //initializacija COM2
 	if (!success) {
 		printf(" fail Com2\n");
 		return 2;
-	};     // fail
-	//printf("Com2 complit\n");
+	};     // fail*/
+	printf("Init port 2\n");
+	hCom2=open("/dev/ttyS1",O_RDWR | O_NOCTTY | O_NDELAY);
+	if(hCom2 == -1){
+		printf("Enable open port 1 \n");
+		}
+		else{
+			struct termios options;
+			tcgetattr(hCom1,&options); //read current settings
+			cfsetispeed(&options, B19200);
+			cfsetospeed(&options, B19200);
+			options.c_cflag &= ~PARENB; //parity control off
+			options.c_cflag &= ~CSTOPB;
+			options.c_cflag &= ~CSIZE;
+			options.c_cflag |= CS8; //on 8 bit mode
+			tcsetattr(hCom1, TCSANOW, &options); //save options			
+			}
 	return 0;
 }
 ;
@@ -4889,10 +5017,12 @@ char Write2Master() //write to master host
 	//SleepWithService(3000);
 	return 0;
 }
+
 //write to remote indicator
 char WriteUBI() //display temperature and humidity on remote indicator
 {
-	EnterCriticalSection (g_LockData);
+	//EnterCriticalSection (g_LockData);
+	pthread_mutex_lock(&mutex1);	
 	int i;
 	char len;
 	char pos = 0;
@@ -4973,8 +5103,11 @@ char WriteUBI() //display temperature and humidity on remote indicator
 		printf(" ");
 	};
 	//printf("\n");
-	DWORD ret = 0;
-	WriteFile(hCom2, ComDataWrite, len, &ret, NULL);
+	/*DWORD ret = 0;
+	WriteFile(hCom2, ComDataWrite, len, &ret, NULL);*/
+	if (write(hCom2,ComDataWrite,len)<0){
+		printf("Port write error");
+		}	
 
 	//Read:
 	//OK:    Error:
@@ -4984,7 +5117,10 @@ char WriteUBI() //display temperature and humidity on remote indicator
 	//CRC         //byte 2 byte 3
 	// CRC        //byte 3 byte 4
 	len = 8;
-	ReadFile(hCom2, ComDataRead, len, &ret, NULL);
+	//ReadFile(hCom2, ComDataRead, len, &ret, NULL);
+	if (read(hCom2, ComDataRead,len)<0){
+		printf("Read error");
+		}	
 	for (i = 0; i < len; i++) {
 		printf("%x", ComDataRead[i]);
 		printf(" ");
@@ -4994,15 +5130,18 @@ char WriteUBI() //display temperature and humidity on remote indicator
 
 	//Rasshifrovka otveta
 	if (ComDataWrite[0] != ComDataRead[0]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 10;
 	}
 	if (ComDataWrite[1] != ComDataRead[1]) {
 		if (ComDataRead[1] != ComDataWrite[1] + 0x80) {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return 11;
 		} else {
-			LeaveCriticalSection(g_LockData);
+			//LeaveCriticalSection(g_LockData);
+			pthread_mutex_unlock(&mutex1);
 			return ComDataRead[2];
 		};
 	} else {
@@ -5013,10 +5152,12 @@ char WriteUBI() //display temperature and humidity on remote indicator
 	//proverka CRC
 	if (ComDataRead[len] != ComDataRead[len + 2]
 			|| ComDataRead[len + 1] != ComDataRead[len + 1 + 2]) {
-		LeaveCriticalSection(g_LockData);
+		//LeaveCriticalSection(g_LockData);
+		pthread_mutex_unlock(&mutex1);
 		return 12;
 	}
-	LeaveCriticalSection(g_LockData);
+	//LeaveCriticalSection(g_LockData);
+	pthread_mutex_unlock(&mutex1);
 	return 0;
 }
 
@@ -5046,7 +5187,7 @@ char Aout() //
 	RegistrTM_int[4] = PotVal; //set potentiometer value
 	RegistrTM_int[5] = 0x40;
 	ComWriteIntReg(0x02, 0x32, 4); //setup DAC registers
-	Sleep(200);
+	msleep(200);
 
 	//printf("%u",ACout0); printf("    ");printf("%u",DacData);printf("\n");
 	//SleepWithService(2000);
@@ -5070,7 +5211,7 @@ void SetPathDir(char * applicationName) {
 	applicationPath[pathLength] = 0;
 }
 
-void T2A(char * dest, TCHAR * source, int length) {
+void T2A(char * dest, char * source, int length) {
 	for (int i = 0; i < length; i++) {
 		dest[i] = (char) source[i];
 	}
@@ -5106,7 +5247,8 @@ void TimedIncrementT_Gen_T_Sr0_T_Sr1_W(bool setAverage, int t_Gen, int t_Sr0,
 void *ReadKeyThreadProc(void * ptr) {
 
 	while (true) {
-		Sleep(400);
+		//printf("Pimmm!\n");
+		msleep(400);
 
 		char tempchar = ReadKeyBuffered();
 		if (tempchar != 'Z') {
@@ -5124,7 +5266,7 @@ unsigned long ClockToMilliseconds(clock_t value) {
 
 char WaitNoKey() {
 	do {
-		Sleep(50);
+		msleep(50);
 		char key = ReadKeyBuffered();
 		if (key == 'Z')
 			return key;
@@ -5133,7 +5275,7 @@ char WaitNoKey() {
 
 char WaitKey() {
 	do {
-		Sleep(50);
+		msleep(50);
 		char key = ReadKeyBuffered();
 		if (key != 'Z' && key != 'S')
 			return key;
@@ -5143,7 +5285,7 @@ char WaitKey() {
 char WaitAnyKey() {
 	char key = 0;
 	do {
-		Sleep(50);
+		msleep(50);
 		char key = ReadKeyBuffered();
 		if (key != 'Z')
 			return key;
@@ -5164,7 +5306,7 @@ bool CheckFilling() {
 }
 
 bool ShutdownServer() {
-	HANDLE hdlProcessHandle;
+	/*HANDLE hdlProcessHandle;
 	HANDLE hdlTokenHandle;
 	LUID tmpLuid;
 	TOKEN_PRIVILEGES tkp;
@@ -5194,17 +5336,17 @@ bool ShutdownServer() {
 	if (error != ERROR_SUCCESS) {
 		//printf("Cannot poweroff computer.");
 		return false;
-	}
+	}*/
 	return true;
 }
 
 void SleepWithService(long sleeptime) {
 	while (sleeptime >= servicetime && servicetime > 0) {
 		sleeptime -= servicetime;
-		Sleep(servicetime);
+		msleep(servicetime);
 		if (sleeptime >= READKEY_INTERVAL) {
 			sleeptime -= READKEY_INTERVAL;
-			Sleep(READKEY_INTERVAL);
+			msleep(READKEY_INTERVAL);
 		}
 		//char * buffer = new char[256];
 		//WriteLog(itoa(servicetime,buffer, 10));
@@ -5212,7 +5354,7 @@ void SleepWithService(long sleeptime) {
 	}
 
 	if (sleeptime > 0) {
-		Sleep(sleeptime);
+		msleep(sleeptime);
 	}
 }
 
@@ -5766,19 +5908,19 @@ char * GetTranslatedString(char * source) {
 	translated[0] = 0;
 
 	for (int i = 0; i < initlength; i++) {
-		if (i < initlength - 1 && source[i] == 'пїЅ' && source[i + 1] == 'пїЅ') {
+		if (i < initlength - 1 && source[i] == 'к' && source[i + 1] == 'с') {
 			strcat(translated, notation[32]);
 			i++;
 			continue;
 		}
 
-		if (i < initlength - 1 && source[i] == 'пїЅ' && source[i + 1] == 'пїЅ') {
+		if (i < initlength - 1 && source[i] == 'ы' && source[i + 1] == 'й') {
 			strcat(translated, notation[33]);
 			i++;
 			continue;
 		}
 
-		if (i < initlength - 1 && source[i] == 'пїЅ' && source[i + 1] == 'пїЅ') {
+		if (i < initlength - 1 && source[i] == 'и' && source[i + 1] == 'й') {
 			strcat(translated, notation[34]);
 			i++;
 			continue;
@@ -5789,8 +5931,8 @@ char * GetTranslatedString(char * source) {
 			continue;
 		}
 
-		if (source[i] >= 'пїЅ' && source[i] <= 'пїЅ') {
-			strcat(translated, notation[(int) source[i] - (int) 'пїЅ']);
+		if (source[i] >= 'а' && source[i] <= 'я') {
+			strcat(translated, notation[(int) source[i] - (int) 'а']);
 		} else {
 			int currentLength = strlen(translated);
 			translated[currentLength] = source[i];
